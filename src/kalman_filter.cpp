@@ -66,9 +66,14 @@ void KalmanFilter::UpdateEKF(const VectorXd &z , const MatrixXd Hja) {
     VectorXd z_(3);
   float rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1) );
   float phi = atan2(x_(1), x_(0));
-  float rho_dot = (x_(0)*x_(2) + x_(1)*x_(3))/rho;// ? 0 : fabs(rho) > 0.0001;
+  float rho_dot = (fabs(rho) > 0.000001)? (x_(0)*x_(2) + x_(1)*x_(3))/rho : 0 ;
     z_ <<  rho, phi , rho_dot; 
     VectorXd y = z - z_;
+    //check phi jump
+    if(fabs(y(1)) >= M_PI/2 )
+      y(1) = 0;
+//     if((y(1)) <= -M_PI/2 )
+//       y(1) += M_PI/2;
     MatrixXd Ht = Hja.transpose();
     MatrixXd S = Hja * P_ * Ht + R_;
     MatrixXd Si = S.inverse();
